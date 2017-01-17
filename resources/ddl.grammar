@@ -1,0 +1,31 @@
+S = CREATE TABLE <INE?> table_name <'('> coldef (<','> coldef)* <')'> [table_attribute] <';'>?
+CREATE = 'CREATE'
+TABLE = 'TABLE'
+INE = 'IF NOT EXISTS'
+table_name = #'\w+'
+
+coldef = column_name data_type [column_attributes] [column_constraints]
+column_name = #'\w+'
+data_type = INTEGER | DECIMAL | VARCHAR | TEXT | DATETIME | SMALLINT | BIGINT
+INTEGER = <#'(?i)INTERGER'> | <#'(?i)int4?'>
+SMALLINT = <#'(?i)SMALLINT'>
+BIGINT = <#'(?i)BIGINT'> | <#'(?i)INT8'>
+DECIMAL = <#'(?i)DECIMAL'> <'('> precision <','> scale <')'>
+number = #'\d+'
+precision = number
+scale = number
+VARCHAR = <#'(?i)VARCHAR'> <'('> vchar_limit <')'>
+TEXT = <#'(?i)TEXT'>
+<vchar_limit> = number | 'max'
+DATETIME = #'(?i)TIMESTAMP' | #'(?i)DATE' | #'(?i)TIMESTAMPTZ'
+column_attributes = #'(?i)DISTKEY'? #'(?i)SORTKEY'?
+
+column_constraints = (NOT_NULL | NULL) | (UNIQUE | PRIMARY_KEY)
+<NOT_NULL> = #'(?i)NOT NULL'
+<NULL> = #'(?i)NULL'
+<UNIQUE> = #'(?i)UNIQUE'
+<PRIMARY_KEY> = #'(?i)PRIMARY_KEY'
+
+table_attribute = [distkey] [sortkey]
+distkey = <#'(?i)DISTKEY'> <'('> column_name <')'>
+sortkey = <#'(?i)SORTKEY'> <'('> column_name (<','> column_name)* <')'>
