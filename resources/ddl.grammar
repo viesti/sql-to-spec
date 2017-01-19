@@ -1,8 +1,11 @@
-S = CREATE TABLE <INE?> table_name <'('> coldef (<','> coldef)* <')'> [table_attribute] <';'>?
-CREATE = 'CREATE'
-TABLE = 'TABLE'
+S = CREATE | ALTER
+CREATE = <'CREATE'> <'TABLE'> <INE?> table_name <'('> coldef (<','> coldef)* <')'> [table_attribute] <';'>?
 INE = 'IF NOT EXISTS'
-table_name = #'\w+'
+<table_name> = #'\w+'
+
+ALTER = <'ALTER'> <'TABLE'> table_name op <';'>?
+op = add
+add = <#'(?i)add'> <#'(?i)COLUMN'?> column_name data_type
 
 coldef = column_name data_type [column_attributes] [column_constraints]
 column_name = #'\w+'
