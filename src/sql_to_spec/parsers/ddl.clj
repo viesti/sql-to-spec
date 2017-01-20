@@ -11,8 +11,8 @@
   :string-ci true
   :auto-whitespace whitespace)
 
-(defn parse [s]
-  (->> s
+(defn parse [sql]
+  (->> sql
        parser
        (transform {:number edn/read-string
                    :DATETIME (comp vector keyword)})))
