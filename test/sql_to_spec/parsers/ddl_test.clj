@@ -93,8 +93,44 @@
 (deftest alter-table
   (is (= [:S
           [:ALTER "test"
-           [:op
+           [:alter-op
             [:add
              [:column_name "id"]
              [:data_type [:INTEGER]]]]]]
          (sut/parse "alter table test add column id int"))))
+
+(deftest multiple-statements
+  (is (= [:S
+          [:CREATE "foo"
+           [:coldef
+            [:column_name "a"]
+            [:data_type [:BIGINT]]]]
+          [:ALTER "foo"
+           [:alter-op
+            [:add
+             [:column_name "name"]
+             [:data_type [:TEXT]]]]]]
+         (sut/parse "
+create table foo (a int8);
+alter table foo add column name text"))))
+
+(defn map-value [f coll]
+  (into {} (for [[k v] coll] [k (f v)])))
+
+(deftest table
+  (is (= {:people/id (s/form (s/spec int?))}
+         (map-value s/form (sut/table "create table people (id int)")))
+      "simple create")
+  (let [table (sut/table "
+create table people (id int); alter table people add column name varchar(200);
+")]
+    (is (= {:people/id (s/form (s/spec int?))
+            :people/name (let [limit 200]
+                           (s/form (s/spec (s/and string?
+                                                  #(<= (.length %) limit)))))}
+           (map-value s/form table))
+        "create and alter with add column")
+    (is (s/valid? (:people/name table)
+                  (String. (byte-array 200) "UTF-8")))
+    (is (not (s/valid? (:people/name table)
+                  (String. (byte-array 201) "UTF-8"))))))

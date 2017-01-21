@@ -1,10 +1,10 @@
-S = CREATE | ALTER
+S = (CREATE | ALTER)*
 CREATE = <'CREATE'> <'TABLE'> <INE?> table_name <'('> coldef (<','> coldef)* <')'> [table_attribute] <';'>?
 INE = 'IF NOT EXISTS'
 <table_name> = #'\w+'
 
-ALTER = <'ALTER'> <'TABLE'> table_name op <';'>?
-op = add
+ALTER = <'ALTER'> <'TABLE'> table_name alter-op <';'>?
+alter-op = add
 add = <#'(?i)add'> <#'(?i)COLUMN'?> column_name data_type
 
 coldef = column_name data_type [column_attributes] [column_constraints]
