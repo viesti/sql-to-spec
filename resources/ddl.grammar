@@ -4,8 +4,9 @@ INE = 'IF NOT EXISTS'
 <table_name> = #'\w+'
 
 ALTER = <'ALTER'> <'TABLE'> table_name alter-op <';'>?
-alter-op = add
-add = <#'(?i)add'> <#'(?i)COLUMN'?> column_name data_type
+alter-op = add | drop
+add = <#'(?i)ADD'> <#'(?i)COLUMN'?> column_name data_type
+drop = <#'(?i)DROP'> <#'(?i)COLUMN'?> column_name
 
 coldef = column_name data_type [column_attributes] [column_constraints]
 column_name = #'\w+'

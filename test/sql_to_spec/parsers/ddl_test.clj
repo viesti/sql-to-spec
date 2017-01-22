@@ -121,8 +121,8 @@ alter table foo add column name text"))))
   (is (= {:people/id (s/form (s/spec int?))}
          (map-value s/form (sut/table "create table people (id int)")))
       "simple create")
-  (let [table (sut/table "
-create table people (id int); alter table people add column name varchar(200);
+  (let [table (sut/table "create table people (id int);
+                          alter table people add column name varchar(200);
 ")]
     (is (= {:people/id (s/form (s/spec int?))
             :people/name (let [limit 200]
@@ -133,4 +133,8 @@ create table people (id int); alter table people add column name varchar(200);
     (is (s/valid? (:people/name table)
                   (String. (byte-array 200) "UTF-8")))
     (is (not (s/valid? (:people/name table)
-                  (String. (byte-array 201) "UTF-8"))))))
+                       (String. (byte-array 201) "UTF-8")))))
+  (let [table (sut/table "create table people (id int, name text);
+                          alter table people drop column name;")]
+    (is (= {:people/id (s/form (s/spec int?))}
+           (map-value s/form table)))))

@@ -27,6 +27,10 @@
   (s/spec (s/and string?
                  #(<= (.length %) limit))))
 
+(defmethod data-type->spec :TEXT [_]
+  (s/spec (s/and string?
+                 #(<= (.length %) 256))))
+
 (defmulti op (fn [[op & tail]] op))
 
 (defn add-coldefs [m table-name specs]
@@ -47,6 +51,9 @@
 (defmethod alter-op :add [table-name [_ & coldefs]]
   (coldefs->map table-name coldefs))
 
+(defmethod alter-op :drop [table-name [_ [_ [_ column-name]]]]
+  {(keyword table-name column-name) nil})
+
 (defmethod op :ALTER [[_ table-name & alter-ops]]
   (first (map #(alter-op table-name %) alter-ops)))
 
@@ -55,4 +62,6 @@
        parse
        rest ; Skips :S, start of grammar
        (map op)
-       (apply merge)))
+       (apply merge)
+       (filter (comp not nil? val))
+       (into {})))
