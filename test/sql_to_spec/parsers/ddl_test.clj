@@ -122,8 +122,7 @@ alter table foo add column name text"))))
          (map-value s/form (sut/table "create table people (id int)")))
       "simple create")
   (let [table (sut/table "create table people (id int);
-                          alter table people add column name varchar(200);
-")]
+                          alter table people add column name varchar(200);")]
     (is (= {:people/id (s/form (s/spec int?))
             :people/name (let [limit 200]
                            (s/form (s/spec (s/and string?
@@ -137,4 +136,8 @@ alter table foo add column name text"))))
   (let [table (sut/table "create table people (id int, name text);
                           alter table people drop column name;")]
     (is (= {:people/id (s/form (s/spec int?))}
-           (map-value s/form table)))))
+           (map-value s/form table))))
+  (testing "Rename table"
+    (let [table (sut/table "create table foo (id int); alter table foo rename to bar;")]
+      (is (= {:bar/id (s/form (s/spec int?))}
+             (map-value s/form table))))))

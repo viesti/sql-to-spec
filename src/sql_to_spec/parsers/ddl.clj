@@ -54,14 +54,34 @@
 (defmethod alter-op :drop [table-name [_ [_ [_ column-name]]]]
   {(keyword table-name column-name) nil})
 
+(defmethod alter-op :rename-table [old-name [_ [_ [_ new-name]]]]
+  {:rename-namespace {:old-name old-name
+                      :new-name new-name}})
+
 (defmethod op :ALTER [[_ table-name & alter-ops]]
   (first (map #(alter-op table-name %) alter-ops)))
+
+(defmethod op :INSERT [_])
+(defmethod op :DELETE [_])
+(defmethod op :DROP [_])
+(defmethod op :comment [_])
+
+(defn rename-namespace [rename-map m]
+  (let [{{:keys [old-name new-name]} :rename-namespace} rename-map]
+    (into {} (for [[k v :as entry] m]
+               (if (= (namespace k) old-name)
+                 [(keyword new-name (name k)) v]
+                 entry)))))
 
 (defn table [sql]
   (->> sql
        parse
        rest ; Skips :S, start of grammar
        (map op)
-       (apply merge)
+       (reduce (fn [acc v]
+                 (if (:rename-namespace v)
+                   (rename-namespace v acc)
+                   (merge acc v)))
+               {})
        (filter (comp not nil? val))
        (into {})))

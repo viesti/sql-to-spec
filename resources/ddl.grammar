@@ -1,28 +1,43 @@
-S = (CREATE | ALTER)*
+S = (CREATE | ALTER | INSERT | DELETE | UPDATE | DROP | comment | GRANT)*
+rest = <#'(?s).*'> <';'>?
+GRANT = <'GRANT'> rest
+comment = <'--'> rest
+INSERT = <'INSERT'> rest <';'>?
+DELETE = <'DELETE'> rest
+UPDATE = <'UPDATE'> rest
+DROP = <'DROP'> rest
 CREATE = <'CREATE'> <'TABLE'> <INE?> table_name <'('> coldef (<','> coldef)* <')'> [table_attribute] <';'>?
 INE = 'IF NOT EXISTS'
-<table_name> = #'\w+'
+
+<word> = #'"?(\w+)"?'
+<table_name> = word
 
 ALTER = <'ALTER'> <'TABLE'> table_name alter-op <';'>?
-alter-op = add | drop
+alter-op = add | drop | rename-table
 add = <#'(?i)ADD'> <#'(?i)COLUMN'?> column_name data_type
 drop = <#'(?i)DROP'> <#'(?i)COLUMN'?> column_name
+rename-table = <'rename'> <'to'> new_name
+new_name = word
 
-coldef = column_name data_type [column_attributes] [column_constraints]
-column_name = #'\w+'
+<attributes-constraints> = [column_attributes] [column_constraints]
+<constraints-attribures> = [column_constraints] [column_attributes]
+coldef = column_name data_type (attributes-constraints | constraints-attribures)
+column_name = word
 data_type = INTEGER | DECIMAL | VARCHAR | TEXT | DATETIME | SMALLINT | BIGINT
 INTEGER = <#'(?i)INTEGER'> | <#'(?i)int4?'>
 SMALLINT = <#'(?i)SMALLINT'>
 BIGINT = <#'(?i)BIGINT'> | <#'(?i)INT8'>
-DECIMAL = <#'(?i)DECIMAL'> <'('> precision <','> scale <')'>
+DECIMAL = <(#'(?i)DECIMAL' | #'(?i)NUMERIC')> <'('> precision <','> scale <')'>
 number = #'\d+'
 precision = number
 scale = number
 VARCHAR = <#'(?i)VARCHAR'> <'('> vchar_limit <')'>
 TEXT = <#'(?i)TEXT'>
 <vchar_limit> = number | 'max'
-DATETIME = #'(?i)TIMESTAMP' | #'(?i)DATE' | #'(?i)TIMESTAMPTZ'
-column_attributes = #'(?i)DISTKEY'? #'(?i)SORTKEY'?
+DATETIME = #'(?i)TIMESTAMP' | #'(?i)TIMESTAMP WITHOUT TIME ZONE' | #'(?i)DATE' | #'(?i)TIMESTAMPTZ'
+column_attributes = ([#'(?i)DISTKEY'] [#'(?i)SORTKEY'] [ENCODE])*
+ENCODE = <'ENCODE'> encoding
+encoding = word
 
 column_constraints = (NOT_NULL | NULL) | (UNIQUE | PRIMARY_KEY)
 <NOT_NULL> = #'(?i)NOT NULL'
@@ -30,6 +45,8 @@ column_constraints = (NOT_NULL | NULL) | (UNIQUE | PRIMARY_KEY)
 <UNIQUE> = #'(?i)UNIQUE'
 <PRIMARY_KEY> = #'(?i)PRIMARY_KEY'
 
-table_attribute = [distkey] [sortkey]
+table_attribute = ([distkey] [sortkey] [diststyle])*
 distkey = <#'(?i)DISTKEY'> <'('> column_name <')'>
 sortkey = <#'(?i)SORTKEY'> <'('> column_name (<','> column_name)* <')'>
+diststyle = <#'(?i)DISTSTYLE'> diststyle-value
+diststyle-value = 'EVEN' | 'KEY' | 'ALL'
