@@ -27,6 +27,12 @@
   (s/spec (s/and string?
                  #(<= (.length %) limit))))
 
+(defmethod data-type->spec :DOUBLE-PRECISION [_]
+  (s/spec #(instance? Double %)))
+
+(defmethod data-type->spec :REAL [_]
+  (s/spec #(instance? Float %)))
+
 (defmethod data-type->spec :TEXT [_]
   (s/spec (s/and string?
                  #(<= (.length %) 256))))

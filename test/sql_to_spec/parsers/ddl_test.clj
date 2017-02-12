@@ -88,7 +88,14 @@
            [:coldef
             [:column_name "a"]
             [:data_type [:BIGINT]]]]]
-         (sut/parse "create table test (a int8)"))))
+         (sut/parse "create table test (a int8)"))
+      "bigint")
+  (is (= [:S
+          [:CREATE "test"
+           [:coldef
+            [:column_name "a"]
+            [:data_type [:DOUBLE-PRECISION]]]]]
+         (sut/parse "create table test (a DOUBLE PRECISION)"))))
 
 (deftest alter-table
   (is (= [:S
@@ -121,6 +128,10 @@ alter table foo add column name text"))))
   (is (= {:people/id (s/form (s/spec int?))}
          (map-value s/form (sut/table "create table people (id int)")))
       "simple create")
+  (is (= {:cube/color (s/form (s/spec #(instance? Double %)))
+          :cube/weight (s/form (s/spec #(instance? Float %)))}
+         (map-value s/form (sut/table "create table cube (color float, weight float4)")))
+      "double and float")
   (let [table (sut/table "create table people (id int);
                           alter table people add column name varchar(200);")]
     (is (= {:people/id (s/form (s/spec int?))
