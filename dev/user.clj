@@ -3,7 +3,9 @@
             [eftest.runner :refer [find-tests run-tests]]
             [clojure.repl :refer :all]
             [instaparse.core :as insta]
-            [clojure.spec :as s]))
+            [clojure.spec :as s]
+            [clojure.java.io :as io]
+            [sql-to-spec.parsers.ddl :as ddl]))
 
 (defn do-test []
   (run-tests (find-tests "test") {:report clojure.test/report}))
