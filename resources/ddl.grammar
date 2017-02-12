@@ -20,8 +20,8 @@ rename-table = <'rename'> <'to'> new_name
 new_name = word
 
 <attributes-constraints> = [column_attributes] [column_constraints]
-<constraints-attribures> = [column_constraints] [column_attributes]
-coldef = column_name data_type (attributes-constraints | constraints-attribures)
+<constraints-attributes> = [column_constraints] [column_attributes]
+coldef = column_name data_type (attributes-constraints | constraints-attributes)
 column_name = word
 data_type = INTEGER | DECIMAL | VARCHAR | TEXT | DATETIME | SMALLINT | BIGINT
 INTEGER = <#'(?i)INTEGER'> | <#'(?i)int4?'>
